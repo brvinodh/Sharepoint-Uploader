@@ -1,0 +1,156 @@
+﻿<Controls:MetroWindow x:Class="SharepointBulkUploadTool.MainWindow"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SharepointBulkUploadTool"
+        xmlns:localConverters="clr-namespace:SharepointBulkUploadTool.Converters"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
+                      xmlns:System="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="Sharepoint Bulk Upload Tool" Height="1000" Width="1000" WindowState="Maximized" BorderThickness="2" BorderBrush="Black">
+    <Controls:MetroWindow.Resources>
+        <localConverters:VMColorToWindowColorConverter x:Key="vmColorConverter">            
+        </localConverters:VMColorToWindowColorConverter>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Controls:MetroWindow.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <TabControl>
+            <TabItem Header="1. List Information" Name="ListInfo">
+                <Grid Margin="50,50, 0, 0" Height="Auto" HorizontalAlignment="Left">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.3*"/>
+                        <ColumnDefinition Width="0.5*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height="500"  />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Enter Sharepoint Site: " VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" DataContext="{Binding SharepointSiteURLItem}">
+                        <TextBox Text="{Binding Value}"  Height="30" Width="500" HorizontalAlignment="Left" VerticalContentAlignment="Center"/>
+                        <fa:ImageAwesome Icon="{Binding ItemStatusIcon}" Spin="{Binding IsInProgress}"
+                         VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{Binding IconColor, Converter={StaticResource vmColorConverter}}"
+                         Margin="5,0" Width="30" Height="25"
+                         />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Select List: " VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" DataContext="{Binding SelectedList}">
+
+                        <ComboBox Name="AllLists" ItemsSource="{Binding DataContext.AllSharepointListNames,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"  
+                         Height="30" Width="500" HorizontalAlignment="Left" SelectedItem="{Binding Value}" VerticalContentAlignment="Center"/>
+
+                        <fa:ImageAwesome Icon="{Binding ItemStatusIcon}" Spin="{Binding IsInProgress}"
+                         VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{Binding IconColor, Converter={StaticResource vmColorConverter}}"
+                         Margin="5,0" Width="30" Height="25"
+                         />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Select Primary Key(s) for Update:" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+                    <StackPanel Grid.Row="3" Grid.Column="1" VerticalAlignment="Top" DataContext="{Binding SelectedListPrimaryColumns}">
+                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                            <ListBox Grid.Row="3" Grid.Column="1" Name="PrimaryKeyColsListBox" SelectionMode="Multiple" Height="200"  Width="500" HorizontalAlignment="Left" 
+                                     ItemsSource="{Binding DataContext.SelectedListAllColumns,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"                                      
+                             SelectionChanged="PrimaryKeyColList_SelectionChanged" 
+                             DisplayMemberPath="ColumnDisplayName" VerticalContentAlignment="Center" BorderBrush="LightGray" BorderThickness="1" >
+                            </ListBox>
+                            
+                            <fa:ImageAwesome Icon="{Binding ItemStatusIcon}" Spin="{Binding IsInProgress}"
+                         VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{Binding IconColor, Converter={StaticResource vmColorConverter}}"
+                         Margin="5,0" Width="30" Height="25"
+                         />
+                        </StackPanel>
+
+                        <TextBlock Text="Selected Primary Key(s)" Visibility="{Binding ElementName=selectedPrimaryKeyItems, Path=Items.Count, Converter={StaticResource BoolToVis}}" />
+                        <ItemsControl Name="selectedPrimaryKeyItems"
+                            ItemsSource="{Binding DataContext.PrimaryKeyColumns,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"                                      
+                            >
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ColumnDisplayName}" FontWeight="Bold" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>                    
+                </Grid>
+            </TabItem>
+            <TabItem Header="2. Update Data" Name="tsvData">
+
+                <TextBox Grid.Row="1" Name="CopyPasteTextBox" Text="{Binding TsvDataText}" AcceptsTab="True" AcceptsReturn="True" TextWrapping="NoWrap">
+
+                </TextBox>
+
+            </TabItem>
+            <TabItem Header="3. Formatted Data" Name="formattedDataOutput">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="35" />
+                    </Grid.RowDefinitions>
+                    <DataGrid Name="dataGrid" DataContext="{Binding}"  ItemsSource="{Binding}" AutoGenerateColumns="True" CanUserAddRows="False" IsReadOnly="True" >
+                     
+                    </DataGrid>
+
+                    <DockPanel Grid.Row="1"  >
+
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal"  >
+                            <TextBlock Text="Filter by:" VerticalAlignment="Center"></TextBlock >
+                            <ComboBox ItemsSource="{Binding AllStatus}" SelectionChanged="FilterValue_Changed" Height="25" Margin="5,0,0,0">                               
+                            </ComboBox>
+
+                            <TextBlock VerticalAlignment="Center" Margin="10,0,0,0">
+                                <TextBlock Text="Filtered Count: "/>
+                                <TextBlock Text="{Binding ElementName=dataGrid, Path=Items.Count}" FontWeight="Bold"/>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Margin="10,0,0,0">         
+                            <Run Text="Total Input Records: "/>
+                            <TextBlock Text="{Binding NumberOfRecordsInputByUser}" FontWeight="Bold"/>
+                            
+                            <Run Text="Total Records Read: "/>
+                            <Bold><TextBlock Text="{Binding NumberOfRecordsRead}"/></Bold>
+                            
+                            
+                            <Run Text="Number of Records Updated: "/>
+                            <TextBlock Text="{Binding NumberOfRecordsUpdated}" FontWeight="Bold"/>                            
+                                                        
+                            <TextBlock >
+                                <TextBlock Text="Records in Error: " />
+                                <Hyperlink><TextBlock Text="{Binding NumberOfRecordsInError}"/></Hyperlink> 
+                            </TextBlock>
+                        </TextBlock>
+
+                        
+                        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBlock Name="totalTimeTaken" DockPanel.Dock="Right"   Visibility="{Binding IsUpdateInProgress}">
+                                <TextBlock Text="Total Time taken: "/>
+                                <TextBlock Text="{Binding TotalTimeElapsed}" FontWeight="Bold"/>
+                            </TextBlock>
+                            <ProgressBar HorizontalAlignment="Right" Width="{Binding ElementName=totalTimeTaken, Path=ActualWidth}"
+                                         IsIndeterminate="True" DockPanel.Dock="Right" Height="3" 
+                                         VerticalAlignment="Center" Visibility="{Binding IsUpdateInProgress, Converter= {StaticResource BoolToVis}}" />
+                        </StackPanel>
+                    </DockPanel>
+                </Grid>
+            </TabItem>            
+        </TabControl>
+
+        <DockPanel Grid.Row="1">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right">
+                <!--<Button Content="&lt; Prev" Width="100" Margin="0,0,10,0" />
+                <Button Content="Next >" Width="100" Margin="0,0,10,0"/>-->
+                <Button Content="Start Update" Width="100" Command="{Binding UploadToSharepointCommand}"  Margin="0,0,10,0"/>                
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Controls:MetroWindow>
